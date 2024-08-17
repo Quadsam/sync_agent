@@ -1,12 +1,14 @@
 [Unit]
-Description=Transfer video files from AgentDVR
+Description=Sync video files from AgentDVR
+After=network-online.target
 
 [Service]
-WorkingDirectory=/home/chris/AgentDVR
+Type=exec
 ExecStart=/usr/local/bin/sync_agent
-SyslogIdentifier=sync_agent
-Restart=always
 RestartSec=60
+Restart=always
+WorkingDirectory=/home/chris/AgentDVR
+SyslogIdentifier=sync_agent
 
 [Install]
-WantedBy=network-online.target
+WantedBy=multi-user.target
