@@ -15,7 +15,9 @@ function find_files()
 		done
 	done
 	count="${#transfer_list[@]}"
-	[[ $count -eq 0 ]] && return 1
+	if[[ $count -eq 0 ]]; then
+		return 1
+	fi
 	export count transfer_list
 	return 0
 }
@@ -25,7 +27,7 @@ function check_file()
 {
 	local file="$1"
 	if ! ffprobe "$file" &>/dev/null; then
-		return 1
+		return 5  # EIO
 	fi
 	return 0
 }
@@ -36,19 +38,22 @@ function transfer_file()
 	local file="$1"
 	mkdir -p "$TARGET_DIR/$(dirname "$file")"
 	if ! rsync --partial -q "$file" "$TARGET_DIR"/"$file"; then
-		return 1
+		return 5  # EIO
 	fi
 	rm "$file"
 	return 0
 }
 
 # Main loop
-cd "$SRC_DIR" || exit 1
+if ! cd "$SRC_DIR"; then
+	exit 2  # ENOENT
+fi
+
 while true; do
 	if ! mountpoint -q "$MOUNT_DIR"; then
 		if ! mount "$MOUNT_DIR"; then
 			printf 'Error mounting "%s"\n' "$MOUNT_DIR"
-			exit 1
+			exit 100  # ENETDOWN
 		fi
 	fi
 	if find_files; then
