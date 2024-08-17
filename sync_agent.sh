@@ -15,7 +15,7 @@ function find_files()
 		done
 	done
 	count="${#transfer_list[@]}"
-	if[[ $count -eq 0 ]]; then
+	if [[ $count -eq 0 ]]; then
 		return 1
 	fi
 	export count transfer_list
