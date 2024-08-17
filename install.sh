@@ -3,7 +3,7 @@
 #- `systemd.service -> /usr/lib/systemd/system/sync_agent.service`
 #- `sync_agent.sh -> /usr/local/bin/sync_agent`
 
-if [[ $(uid -u) -ne 0 ]]; then
+if [[ $(id -u) -ne 0 ]]; then
 	printf 'ERROR: Run as root!\n'
 	exit 1
 fi
