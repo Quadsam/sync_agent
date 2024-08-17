@@ -2,7 +2,8 @@
 
 # Config vars
 SRC_DIR='/home/chris/AgentDVR/Media/WebServerRoot/Media/video'
-TARGET_DIR='/mnt/nas/recordings'
+MOUNT_DIR='/mnt/Saturn'
+TARGET_DIR="$MOUNT_DIR/recordings"
 
 # Find '.mkv' files
 function find_files()
@@ -44,20 +45,22 @@ function transfer_file()
 # Main loop
 cd "$SRC_DIR" || exit 1
 while true; do
+	if ! mountpoint -q "$MOUNT_DIR"; then
+		if ! mount "$MOUNT_DIR"; then
+			printf 'Error mounting "%s"\n' "$MOUNT_DIR"
+			exit 1
+		fi
+	fi
 	if find_files; then
 		i=0
 		for file in "${transfer_list[@]}"; do
 			((i++))
 			printf 'Checking file (%s/%s)\n' "$i" "$count"
 			if check_file "$file"; then
-				if mountpoint -q "$TARGET_DIR"; then
-					if transfer_file "$file"; then
-						printf 'Transferred file ("%s")\n' "$file"
-					else
-						printf 'ERROR: An error occured while transfering the file "%s"\n' "$file"
-					fi
+				if transfer_file "$file"; then
+					printf 'Transferred file ("%s")\n' "$file"
 				else
-					printf 'ERROR: Target is not mounted!\n'
+					printf 'ERROR: An error occured while transfering the file "%s"\n' "$file"
 				fi
 			else
 				printf 'File incomplete, skipping\n'
